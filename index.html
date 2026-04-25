@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인성 ♥ 누리</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#03010f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="인성♥누리">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Noto Serif KR', serif;
+  background: #03010f;
+}
+
+/* ── CANVAS ── */
+#bg { position: fixed; inset: 0; z-index: 0; }
+
+/* ── LANDING ── */
+#landing {
+  position: fixed; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 18px;
+  transition: opacity 1.6s ease;
+}
+#landing.out { opacity: 0; pointer-events: none; }
+
+.l-heart {
+  font-size: 56px;
+  filter: drop-shadow(0 0 36px rgba(255, 140, 170, .65));
+  animation: hb 2.6s ease-in-out infinite;
+}
+@keyframes hb {
+  0%, 100% { transform: scale(1); }
+  15%       { transform: scale(1.3); }
+  30%       { transform: scale(1.12); }
+  45%       { transform: scale(1.22); }
+}
+
+.l-names {
+  font-size: clamp(1.8em, 5.5vw, 3em);
+  font-weight: 300;
+  letter-spacing: 10px;
+  background: linear-gradient(135deg, #f5e8b0 0%, #ffd878 45%, #ffb8cc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.l-date {
+  font-size: .78em;
+  color: rgba(255, 255, 255, .28);
+  letter-spacing: 5px;
+  font-weight: 300;
+}
+
+.l-rule {
+  width: 72px; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 218, 130, .55), transparent);
+}
+
+.l-sub {
+  font-size: clamp(.82em, 2vw, .94em);
+  color: rgba(255, 255, 255, .42);
+  font-style: italic;
+  letter-spacing: 1px;
+}
+
+.l-btn {
+  margin-top: 10px;
+  padding: 14px 48px;
+  background: transparent;
+  border: 1px solid rgba(245, 218, 130, .5);
+  color: rgba(245, 218, 130, .8);
+  font-family: inherit;
+  font-size: .96em;
+  letter-spacing: 3px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all .4s ease;
+}
+.l-btn:hover {
+  background: rgba(245, 218, 130, .08);
+  border-color: rgba(245, 218, 130, .8);
+  color: rgba(245, 218, 130, 1);
+  box-shadow: 0 0 52px rgba(245, 218, 130, .18), inset 0 0 20px rgba(245, 218, 130, .05);
+  transform: translateY(-3px);
+}
+
+/* ── LETTER ── */
+#letter {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 1.8s ease;
+}
+#letter.on { opacity: 1; pointer-events: all; }
+
+.letter-wrap {
+  width: 100%; max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.letter-wrap::-webkit-scrollbar { display: none; }
+
+.letter-card {
+  position: relative;
+  background: rgba(255, 255, 255, .045);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, .13);
+  border-radius: 24px;
+  padding: 60px 56px 52px;
+  overflow: hidden;
+  animation: cardIn 1.2s cubic-bezier(.22, 1, .36, 1) both;
+}
+@keyframes cardIn {
+  0%   { transform: translateY(36px) scale(.97); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+/* Top shimmer line */
+.letter-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 218, 130, .7), transparent);
+}
+
+/* Inner glow */
+.letter-card::after {
+  content: '';
+  position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+  width: 380px; height: 220px; border-radius: 50%;
+  background: radial-gradient(rgba(245, 218, 130, .04), transparent);
+  pointer-events: none;
+}
+
+.ltr-to {
+  font-size: .72em;
+  letter-spacing: 4px;
+  color: rgba(245, 218, 130, .5);
+  margin-bottom: 36px;
+  font-weight: 300;
+}
+
+.ltr-body {
+  font-size: clamp(.9em, 2.2vw, 1.02em);
+  line-height: 2.5;
+  color: rgba(255, 255, 255, .78);
+  font-weight: 300;
+  font-style: italic;
+  word-break: keep-all;
+}
+.ltr-body p { margin-bottom: 22px; }
+.ltr-body .em {
+  color: #f5e0a0;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.ltr-rule {
+  width: 48px; height: 1px; margin: 32px 0;
+  background: linear-gradient(90deg, rgba(245, 218, 130, .35), transparent);
+}
+
+.ltr-sig {
+  font-size: .9em;
+  color: rgba(245, 218, 130, .7);
+  font-style: normal;
+  font-weight: 300;
+  letter-spacing: 2px;
+  line-height: 2;
+}
+
+/* ── SHOOTING STARS ── */
+.sstar {
+  position: fixed; pointer-events: none; z-index: 5;
+  width: 2px; height: 2px; border-radius: 50%;
+  background: white;
+  box-shadow: 0 0 5px 1px rgba(255,255,255,.7);
+  opacity: 0;
+  animation: shoot linear forwards;
+}
+.sstar::after {
+  content: '';
+  position: absolute; right: 2px; top: 0;
+  width: 90px; height: 1px;
+  background: linear-gradient(to left, rgba(255,255,255,.7), transparent);
+  transform-origin: right center;
+}
+@keyframes shoot {
+  0%  { opacity: 0; transform: translate(0,0); }
+  6%  { opacity: 1; }
+  35% { opacity: 0; transform: translate(220px, 110px); }
+  100%{ opacity: 0; transform: translate(220px, 110px); }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<!-- Landing -->
+<div id="landing">
+  <div class="l-heart">♥</div>
+  <div class="l-names">인성 &amp; 누리</div>
+  <div class="l-date">2015 · 04 · 25</div>
+  <div class="l-rule"></div>
+  <div class="l-sub">12년째가 시작되는 날</div>
+  <button class="l-btn" onclick="openLetter()">편지 열기</button>
+</div>
+
+<!-- Letter -->
+<div id="letter">
+  <div class="letter-wrap">
+    <div class="letter-card">
+      <div class="ltr-to">누리에게</div>
+      <div class="ltr-body">
+
+        <p>오늘은 우리 <span class="em">12년째의 첫 번째 날</span>이야.</p>
+
+        <p>2015년 4월 25일부터 지금까지 —<br>
+        네가 내 옆에 있어줬어.<br>
+        그 시간이 얼마나 큰 건지,<br>
+        요즘 들어 자꾸 생각해.</p>
+
+        <p>결혼식 날 네 손을 잡았을 때,<br>
+        2018년 11월 4일 네가 우리 아이를 처음 안았을 때,<br>
+        그리고 아무것도 아닌 평범한 날들에도 —<br>
+        네가 곁에 있었어.</p>
+
+        <p>매일 보는 얼굴인데<br>
+        웃을 때 <span class="em">여전히 심장이 뛰어.</span><br>
+        11년이 지났는데도.<br>
+        그게 제일 신기하고,<br>
+        그래서 나는 매일 감사해.</p>
+
+        <p><span class="em">함께해줘서 고마워, 누리.</span><br>
+        앞으로도 계속 네 옆에 있을게.</p>
+
+      </div>
+      <div class="ltr-rule"></div>
+      <div class="ltr-sig">
+        영원히, 언제까지나<br>
+        인성 ♥
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── CANVAS: cosmic sky ── */
+const cvs = document.getElementById('bg');
+const ctx = cvs.getContext('2d');
+let W, H, stars = [], t = 0;
+
+function resize() {
+  W = cvs.width  = window.innerWidth;
+  H = cvs.height = window.innerHeight;
+  buildStars();
+}
+
+function buildStars() {
+  stars = [];
+  const n = Math.min(320, Math.floor(W * H / 3000));
+  for (let i = 0; i < n; i++) {
+    stars.push({
+      x:  Math.random() * W,
+      y:  Math.random() * H * .65,
+      r:  .25 + Math.random() * 1.55,
+      ph: Math.random() * Math.PI * 2,
+      sp: .004 + Math.random() * .014,
+      hue: 210 + Math.random() * 55,
+    });
+  }
+}
+
+function aurora(y0, amp, freq, phase, col) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  ctx.beginPath();
+  for (let i = 0; i <= 100; i++) {
+    const x = (i / 100) * W;
+    const y = y0
+      + Math.sin(x * freq + phase + t * .35) * amp * .55
+      + Math.sin(x * freq * 2.1 + phase * 1.4 + t * .22) * amp * .28
+      + Math.sin(x * freq * .42 + phase * .7  + t * .55) * amp * .17;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.lineTo(W, 0); ctx.lineTo(0, 0); ctx.closePath();
+  const g = ctx.createLinearGradient(0, y0 - amp * 1.4, 0, y0 + amp * 2.2);
+  g.addColorStop(0, 'transparent');
+  g.addColorStop(.45, col);
+  g.addColorStop(1,  'transparent');
+  ctx.fillStyle = g; ctx.fill();
+  ctx.restore();
+}
+
+function frame() {
+  t += .006;
+  ctx.clearRect(0, 0, W, H);
+
+  /* Sky */
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0,    '#02000c');
+  sky.addColorStop(.10,  '#080320');
+  sky.addColorStop(.22,  '#110838');
+  sky.addColorStop(.36,  '#1a1252');
+  sky.addColorStop(.50,  '#261a6a');
+  sky.addColorStop(.62,  '#3c2880');
+  sky.addColorStop(.72,  '#6040a0');
+  sky.addColorStop(.82,  '#9a60a8');
+  sky.addColorStop(.91,  '#d08060');
+  sky.addColorStop(.97,  '#eea040');
+  sky.addColorStop(1,    '#f5b830');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+
+  /* Horizon warmth */
+  const hw = ctx.createRadialGradient(W*.5, H, 0, W*.5, H, H * .7);
+  hw.addColorStop(0,   'rgba(255, 168, 50, .32)');
+  hw.addColorStop(.35, 'rgba(230, 110, 30, .10)');
+  hw.addColorStop(1,   'rgba(200,  70, 10,  0)');
+  ctx.fillStyle = hw;
+  ctx.fillRect(0, 0, W, H);
+
+  /* Sun */
+  const sx = W * .5, sy = H * .025;
+  const sun = ctx.createRadialGradient(sx, sy, 0, sx, sy, W * .52);
+  sun.addColorStop(0,    'rgba(255,255,255,.98)');
+  sun.addColorStop(.032, 'rgba(255,255,230,.84)');
+  sun.addColorStop(.09,  'rgba(255,248,200,.42)');
+  sun.addColorStop(.26,  'rgba(255,238,170,.13)');
+  sun.addColorStop(.55,  'rgba(255,228,145,.04)');
+  sun.addColorStop(1,    'rgba(255,218,130, 0)');
+  ctx.fillStyle = sun;
+  ctx.fillRect(0, 0, W, H);
+
+  /* God rays */
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  for (let i = 0; i < 16; i++) {
+    const a = -Math.PI * .5 + (i / 15) * Math.PI * .68 - Math.PI * .34 + Math.sin(i * 1.4) * .025;
+    const hw2 = .008 + (i % 3) * .006;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(sx + Math.cos(a - hw2) * H * 2.5, sy + Math.sin(a - hw2) * H * 2.5);
+    ctx.lineTo(sx + Math.cos(a + hw2) * H * 2.5, sy + Math.sin(a + hw2) * H * 2.5);
+    ctx.closePath();
+    const rg = ctx.createRadialGradient(sx, sy, H * .01, sx, sy, H * 1.6);
+    rg.addColorStop(0,   'rgba(255,255,218,.055)');
+    rg.addColorStop(.2,  'rgba(255,248,195,.028)');
+    rg.addColorStop(.6,  'rgba(255,238,180,.012)');
+    rg.addColorStop(1,   'rgba(255,228,165, 0)');
+    ctx.fillStyle = rg; ctx.fill();
+  }
+  ctx.restore();
+
+  /* Aurora */
+  aurora(H * .17, H * .08, .0022, 0.0,  'rgba(50,220,190,.052)');
+  aurora(H * .23, H * .07, .0030, 1.9,  'rgba(150,80,240,.045)');
+  aurora(H * .19, H * .055,.0017, 3.8,  'rgba(70,170,255,.036)');
+  aurora(H * .27, H * .050,.0034, 5.3,  'rgba(255,110,175,.025)');
+
+  /* Stars */
+  stars.forEach(s => {
+    s.ph += s.sp;
+    const op = .12 + .85 * Math.abs(Math.sin(s.ph));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsl(${s.hue}, 45%, 93%)`;
+    ctx.globalAlpha = op;
+    ctx.fill();
+    if (s.r > 1.1) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r * 2.6, 0, Math.PI * 2);
+      ctx.globalAlpha = op * .09;
+      ctx.fill();
+    }
+  });
+  ctx.globalAlpha = 1;
+
+  /* Top veil */
+  const veil = ctx.createLinearGradient(0, 0, 0, H * .12);
+  veil.addColorStop(0, 'rgba(2,0,12,.6)');
+  veil.addColorStop(1, 'rgba(2,0,12,0)');
+  ctx.fillStyle = veil;
+  ctx.fillRect(0, 0, W, H * .12);
+
+  requestAnimationFrame(frame);
+}
+
+/* Shooting stars */
+function shootStar() {
+  const el = document.createElement('div');
+  el.className = 'sstar';
+  el.style.left  = (8  + Math.random() * 58) + 'vw';
+  el.style.top   = (3  + Math.random() * 22) + 'vh';
+  el.style.transform = `rotate(${22 + Math.random() * 22}deg)`;
+  el.style.animationDuration = (1.8 + Math.random() * 1.8) + 's';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 3800);
+}
+
+function scheduleShoot() {
+  setTimeout(() => { shootStar(); scheduleShoot(); }, 3500 + Math.random() * 6000);
+}
+
+/* Letter open */
+function openLetter() {
+  document.getElementById('landing').classList.add('out');
+  setTimeout(() => {
+    document.getElementById('landing').style.display = 'none';
+    document.getElementById('letter').classList.add('on');
+  }, 1700);
+}
+
+window.addEventListener('load', () => {
+  resize();
+  frame();
+  scheduleShoot();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  }
+});
+window.addEventListener('resize', resize);
+</script>
+</body>
+</html>
